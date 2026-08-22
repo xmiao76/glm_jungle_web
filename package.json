@@ -1,0 +1,38 @@
+{
+  "name": "jungle-web",
+  "private": true,
+  "version": "1.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "tsx src/bench/benchmark.ts",
+    "duel:local": "tsx src/bench/duelLocal.ts",
+    "duel": "tsx src/bench/duel.ts",
+    "selfplay": "tsx src/bench/selfplay.ts",
+    "tune": "tsx src/bench/tune.ts",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=glm-jungle --branch=main",
+    "deploy:workers": "npm run build && wrangler deploy",
+    "serve:dist": "wrangler pages dev dist"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.62.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.0",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.0.0"
+  }
+}
