@@ -5,10 +5,9 @@
  * Mirrors the desktop repo's bench/benchmark.py (same positions) so node
  * throughput can be compared 1:1 against the Python engine.
  */
-import { Board } from "../engine/board";
-import { BLUE, RED, LION, TIGER, RAT, WOLF, ELEPHANT, DOG } from "../engine/constants";
-import { findBestMove } from "../ai/search";
-import { TranspositionTable } from "../ai/transposition";
+import { Board } from "../../reference/engine/board";
+import { BLUE, RED, LION, TIGER, RAT, WOLF, ELEPHANT, DOG } from "../../reference/engine/constants";
+import { findBestMove } from "../wasm/engine";
 
 // A few representative positions (identical to bench/benchmark.py).
 const POSITIONS: Record<string, () => Board> = {
@@ -48,7 +47,6 @@ function main(): void {
     ] as const) {
       const result = findBestMove(make(), player, {
         timeLimit,
-        tt: new TranspositionTable(),
       });
       const nps = result.nodes / Math.max(result.elapsedMs / 1000, 1e-6);
       console.log(

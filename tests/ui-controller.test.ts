@@ -5,9 +5,9 @@
  * serialization - pure logic without canvas/React.
  */
 import { describe, it, expect } from "vitest";
-import { Board, BLUE, RED } from "../src/engine";
-import { computeHash } from "../src/ai/zobrist";
-import { checkDraw, FIRST_MOVER_CHOICES } from "../src/ui/gameController";
+import { Board, BLUE, RED } from "../reference/engine";
+import { computeHash } from "../reference/ai/zobrist";
+import { checkDraw, FIRST_MOVER_CHOICES } from "../reference/ui/gameController";
 
 describe("UI Controller Logic", () => {
   describe("flip mapping", () => {

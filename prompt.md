@@ -1,3 +1,9 @@
+> **Historical specification.** The v2.0 WebAssembly refactor supersedes the
+> website-deployment requirements below. The deliverable is a locally testable,
+> versioned WebAssembly ZIP with a Node.js loopback launcher. Builds and packaging
+> must never publish to Cloudflare or another website. See README.md for the
+> current build, validation, and manual release workflow.
+
 Act as a senior software architect and technical lead specializing in web game development and game AI.
 
 Create a step-by-step development plan for a browser-based Jungle board game application with a polished GUI and a built-in AI so a human can play against the computer on a visual board in a web browser. The final deliverable is a deployed, playable web app on Cloudflare, not a downloadable executable.

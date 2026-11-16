@@ -1,16 +1,14 @@
-/** Tests for the game rules engine (1:1 port of tests/test_rules.py). */
+/** Original rule fixtures; move generation and terminal outcomes run in Rust/WASM. */
 import { describe, expect, test } from "vitest";
-import { Board } from "../src/engine/board";
-import { Move } from "../src/engine/move";
+import { Board } from "../reference/engine/board";
+import { Move } from "../reference/engine/move";
 import {
-  getLegalMoves,
-  getAllLegalMoves,
   makeMove,
   makeMoveInPlace,
   undoMoveInPlace,
-  getGameState,
   getEffectiveRank,
-} from "../src/engine/rules";
+} from "../reference/engine/rules";
+import {getLegalMoves, getAllLegalMoves, getGameState} from "../src/wasm/rules";
 import {
   BOARD_ROWS,
   BOARD_COLS,
@@ -24,7 +22,7 @@ import {
   TIGER,
   LION,
   ELEPHANT,
-} from "../src/engine/constants";
+} from "../reference/engine/constants";
 
 /** Helper: create a board with specific pieces. Each tuple is [pieceType, owner, row, col]. */
 function makeBoardWith(...pieces: [number, number, number, number][]): Board {

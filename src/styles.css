@@ -1,0 +1,572 @@
+/**
+ * UI styles for the Jungle game.
+ *
+ * Hand-written CSS for the game interface: panel cards, menu buttons,
+ * overlays, and ambient menu background.
+ */
+
+/* Global resets */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family:
+    "Segoe UI Variable Display",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+/* ---------- Panel cards ---------- */
+
+.panel-card {
+  background: linear-gradient(180deg, #2a3040 0%, #262c3a 45%, #222835 100%);
+  border: 1px solid #343c4e;
+  border-radius: 10px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 6px 14px rgba(5, 7, 11, 0.35),
+    0 1px 3px rgba(5, 7, 11, 0.4);
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.menu-btn {
+  --btn-base: #343e52;
+  --btn-edge: #56637e;
+
+  position: relative;
+  padding: 12px 24px;
+  border: 1.5px solid var(--btn-edge);
+  border-radius: 10px;
+  color: #f0f3fa;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0) 38%
+    ),
+    var(--btn-base);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 3px 8px rgba(5, 7, 11, 0.4);
+  transition:
+    transform 0.14s ease-out,
+    box-shadow 0.14s ease-out,
+    filter 0.14s ease-out,
+    border-color 0.14s ease-out;
+  will-change: transform;
+}
+
+.menu-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.14);
+  border-color: color-mix(in srgb, var(--btn-edge) 60%, white 40%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 8px 18px rgba(5, 7, 11, 0.5),
+    0 0 14px color-mix(in srgb, var(--btn-edge) 35%, transparent);
+}
+
+.menu-btn:active {
+  transform: translateY(0) scale(0.985);
+  filter: brightness(0.97);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 2px 5px rgba(5, 7, 11, 0.45);
+}
+
+/* ---------- Menus ---------- */
+
+/* Ambient drifting light blobs behind menu content */
+.menu-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.menu-bg::before,
+.menu-bg::after {
+  content: "";
+  position: absolute;
+  width: 55vmax;
+  height: 55vmax;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.menu-bg::before {
+  background: radial-gradient(circle, #426ee0 0%, transparent 60%);
+  top: -18vmax;
+  left: -12vmax;
+  animation: drift1 26s ease-in-out infinite alternate;
+}
+
+.menu-bg::after {
+  background: radial-gradient(circle, #d44242 0%, transparent 60%);
+  bottom: -20vmax;
+  right: -14vmax;
+  animation: drift2 32s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(9vmax, 6vmax) scale(1.12);
+  }
+}
+
+@keyframes drift2 {
+  from {
+    transform: translate(0, 0) scale(1.08);
+  }
+  to {
+    transform: translate(-8vmax, -5vmax) scale(0.96);
+  }
+}
+
+.menu-hero-title {
+  background: linear-gradient(180deg, #ffe9a8 0%, #ffd054 55%, #e0a63a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 10px rgba(255, 208, 84, 0.25));
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Game over overlay ---------- */
+
+.game-over-card {
+  animation: slideUp 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.07) inset,
+    0 18px 50px rgba(5, 7, 11, 0.6);
+}
+
+.game-over-title {
+  text-shadow:
+    0 0 22px currentColor,
+    0 2px 6px rgba(5, 7, 11, 0.6);
+}
+
+/* ---------- Canvas interaction ---------- */
+
+canvas {
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Animations ---------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Utility classes */
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-bg::before,
+  .menu-bg::after {
+    animation: none;
+  }
+  .menu-btn,
+  .game-over-card {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ---------- How to play / credits ---------- */
+
+.rules-panel {
+  overflow-y: auto;
+  max-height: min(46vh, 420px);
+  animation: slideUp 0.28s ease-out;
+}
+
+.credits-footer {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6f7889;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+/* Rust/Yew application layout. */
+.menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px 16px 60px;
+  overflow-y: auto;
+}
+.menu-bg {
+  pointer-events: none;
+}
+.menu-heading,
+.menu-buttons,
+.rules-panel,
+.quit-hint {
+  position: relative;
+}
+.menu-heading {
+  text-align: center;
+}
+.menu-heading h1 {
+  font-size: clamp(42px, 12vh, 96px);
+  margin-bottom: 8px;
+}
+.menu-heading h2 {
+  font-size: clamp(32px, 9vh, 64px);
+  color: #ffd054;
+  margin-bottom: 16px;
+}
+.menu-heading p {
+  font-size: clamp(16px, 4.5vh, 32px);
+  font-weight: 300;
+  color: #b2baca;
+}
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(90vw, 380px);
+}
+.blue-button {
+  --btn-base: #1c3482;
+  --btn-edge: #426ee0;
+}
+.red-button {
+  --btn-base: #801c1c;
+  --btn-edge: #d44242;
+}
+.rules-panel {
+  max-width: 760px;
+  padding: 20px;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+.rules-panel p + p {
+  margin-top: 10px;
+}
+.game {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #181c26;
+}
+.board-area {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+.board-area canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.side-panel {
+  width: 300px;
+  flex-shrink: 0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  background: #1e232f;
+  overflow-y: auto;
+}
+.side-panel .panel-card {
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.panel-card h3 {
+  color: #949cac;
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  margin-bottom: 8px;
+}
+.turn-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+}
+.side-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.blue {
+  background: #426ee0;
+}
+.red {
+  background: #d44242;
+}
+.blue-text {
+  color: #769bff;
+}
+.red-text {
+  color: #fa7777;
+}
+.gold-text {
+  color: #ffd054;
+}
+.turn-number {
+  margin-left: auto;
+  font-size: 16px;
+  color: #949cac;
+}
+.eval-bar {
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: linear-gradient(#801c1c, #5a1414);
+  position: relative;
+}
+.eval-bar div {
+  height: 100%;
+  background: linear-gradient(#426ee0, #2f4fb0);
+  transition: width 0.18s ease-out;
+}
+.eval-bar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: #ffffff59;
+}
+.engine-card {
+  min-height: 122px;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.engine-card small {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #949cac;
+}
+.captured-row {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.capture-tokens {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.captured-token {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+.captured-row > span:first-child {
+  min-width: 32px;
+}
+.controls {
+  display: flex;
+  gap: 8px;
+}
+.small-btn {
+  color: #f0f3fa;
+  background: #343e52;
+  border: 1px solid #56637e;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.small-btn:hover:enabled {
+  background: #424e66;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.history-card {
+  min-height: 80px;
+  max-height: 220px;
+  display: flex;
+  flex-direction: column;
+}
+#move-log {
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.65;
+  font-variant-numeric: tabular-nums;
+}
+.dim,
+.panel-hints {
+  color: #949cac;
+}
+.panel-hints {
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: auto;
+  padding-top: 12px;
+}
+.menu-return {
+  margin-top: 10px;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #05070b88;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 24px;
+}
+.game-over-card {
+  border: 2px solid #56637e;
+  border-radius: 18px;
+  background: #262c3af5;
+  padding: 32px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.game-over-title {
+  font-size: clamp(32px, 7vw, 72px);
+}
+.game-over-card span {
+  font-size: 16px;
+  color: #949cac;
+}
+.error-overlay {
+  z-index: 20;
+}
+.error-card,
+.startup-error {
+  background: #262c3a;
+  border: 1px solid #56637e;
+  border-radius: 14px;
+  max-width: 680px;
+  padding: 32px;
+}
+.error-card p,
+.startup-error p {
+  margin: 18px 0;
+  line-height: 1.5;
+}
+.error-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.startup-error {
+  margin: 10vh auto;
+}
+.quit-hint {
+  color: #b2baca;
+  text-align: center;
+}
+@media (max-width: 760px) {
+  .game {
+    flex-direction: column;
+  }
+  .board-area {
+    min-height: 65vh;
+  }
+  .side-panel {
+    width: 100%;
+    max-height: 35vh;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .side-panel .panel-card {
+    margin: 0;
+  }
+  .credits-footer {
+    font-size: 11px;
+  }
+}
+@media (max-height: 700px) {
+  .menu {
+    gap: 12px;
+    justify-content: flex-start;
+  }
+  .menu-buttons {
+    gap: 8px;
+  }
+  .menu-btn {
+    font-size: 17px;
+    padding: 10px 20px;
+  }
+  .credits-footer {
+    position: relative;
+    bottom: auto;
+    margin-top: 12px;
+  }
+}

@@ -1,19 +1,19 @@
-/** Cross-validation of the fast ai/position core against engine/rules.
+/** Cross-validation of the reference TypeScript position core against Rust/WASM rules.
  *
- * The search runs on ai/position for speed; engine/rules stays the source of
- * truth. These tests fuzz random playouts and assert the two implementations
+ * These tests fuzz random playouts and assert the two implementations
  * agree on move generation, game state, Zobrist keys, material, evaluation,
  * and make/undo restoration. Port of tests/test_position.py.
  */
 import { describe, expect, test } from "vitest";
-import { Board } from "../src/engine/board";
-import { Move } from "../src/engine/move";
-import { getAllLegalMoves, makeMove, getGameState } from "../src/engine/rules";
-import { BOARD_COLS, BLUE, RED, RAT, LION, TIGER } from "../src/engine/constants";
-import { Position, mvFrom, mvTo, mvCap } from "../src/ai/position";
-import { PT_OF, SIDE_OF, VALUE, PSTS, DEN_SQ_BLUE, DEN_SQ_RED, SQ } from "../src/ai/tables";
-import { evaluate, evaluatePos, PIECE_VALUES } from "../src/ai/evaluation";
-import { computeHash } from "../src/ai/zobrist";
+import { Board } from "../reference/engine/board";
+import { Move } from "../reference/engine/move";
+import { makeMove } from "../reference/engine/rules";
+import {getAllLegalMoves, getGameState} from "../src/wasm/rules";
+import { BOARD_COLS, BLUE, RED, RAT, LION, TIGER } from "../reference/engine/constants";
+import { Position, mvFrom, mvTo, mvCap } from "../reference/ai/position";
+import { PT_OF, SIDE_OF, VALUE, PSTS, DEN_SQ_BLUE, DEN_SQ_RED, SQ } from "../reference/ai/tables";
+import { evaluate, evaluatePos, PIECE_VALUES } from "../reference/ai/evaluation";
+import { computeHash } from "../reference/ai/zobrist";
 import { makeRng, pick, type Rng } from "./helpers";
 
 function codeOf(pieceType: number, owner: number): number {

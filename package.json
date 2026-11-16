@@ -1,38 +1,39 @@
 {
   "name": "jungle-web",
   "private": true,
-  "version": "1.1.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node tools/dev.mjs",
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "test": "vitest run",
+    "build": "node tools/wasm-build.mjs && tsc --noEmit && vite build && node tools/release.mjs manifest",
+    "preview": "node tools/serve.mjs --root dist",
+    "test": "node tools/wasm-build.mjs --worker-only && cargo test -p jungle-core && vitest run && node --test tests/release.test.mjs",
     "test:watch": "vitest",
     "bench": "tsx src/bench/benchmark.ts",
     "duel:local": "tsx src/bench/duelLocal.ts",
     "duel": "tsx src/bench/duel.ts",
     "selfplay": "tsx src/bench/selfplay.ts",
     "tune": "tsx src/bench/tune.ts",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name=glm-jungle --branch=main",
-    "deploy:workers": "npm run build && wrangler deploy",
-    "serve:dist": "wrangler pages dev dist"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "serve:dist": "node tools/serve.mjs --root dist",
+    "build:wasm": "node tools/wasm-build.mjs",
+    "test:browser": "node tools/browserCheck.mjs",
+    "package": "node tools/release.mjs package"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
     "playwright": "^1.62.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
     "vitest": "^4.1.11",
-    "wrangler": "^4.0.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "fflate": "^0.8.2"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

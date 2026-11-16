@@ -1,5 +1,5 @@
 /** Shared test helpers: deterministic RNG (mirrors Python's random.Random(seed).choice). */
-import { mulberry32 } from "../src/ai/zobrist";
+import { mulberry32 } from "../reference/ai/zobrist";
 
 export type Rng = () => number;
 

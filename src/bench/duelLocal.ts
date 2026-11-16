@@ -5,14 +5,14 @@
  *
  * Run:  npm run duel:local -- --a base --b rfp --games 40 --time 0.1
  */
-import { Board } from "../engine/board";
-import { BLUE, RED } from "../engine/constants";
-import { getAllLegalMoves, makeMove, getGameState } from "../engine/rules";
-import { findBestMove, SearchConfig, type SearchOptions } from "../ai/search";
-import { TranspositionTable } from "../ai/transposition";
-import { computeHash } from "../ai/zobrist";
-import { checkDraw, hashKey, MAX_GAME_MOVES } from "../engine/draw";
-import { mulberry32 } from "../ai/zobrist";
+import { Board } from "../../reference/engine/board";
+import { BLUE, RED } from "../../reference/engine/constants";
+import { getAllLegalMoves, makeMove, getGameState } from "../../reference/engine/rules";
+import { findBestMove, SearchConfig, type SearchOptions } from "../wasm/engine";
+import { TranspositionTable } from "../wasm/engine";
+import { computeHash } from "../../reference/ai/zobrist";
+import { checkDraw, hashKey, MAX_GAME_MOVES } from "../../reference/engine/draw";
+import { mulberry32 } from "../../reference/ai/zobrist";
 
 /** Named feature-switch configurations under test. */
 export function configByName(name: string): SearchConfig {
@@ -84,7 +84,7 @@ export function playConfigGame(
   let moveCount = 0;
   let plies = 0;
 
-  for (;;) {
+  try { for (;;) {
     const state = getGameState(board);
     if (state.over) {
       return {
@@ -132,7 +132,7 @@ export function playConfigGame(
     current = current === BLUE ? RED : BLUE;
     if (current === BLUE) moveCount++;
     plies++;
-  }
+  }} finally { for (const tt of tts.values()) tt.free(); }
 }
 
 export interface DuelSummary {

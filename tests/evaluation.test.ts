@@ -1,7 +1,7 @@
 /** Tests for the evaluation: BFS maps, PSTs, invariants. Port of tests/test_evaluation.py. */
 import { describe, expect, test } from "vitest";
-import { Board } from "../src/engine/board";
-import { getAllLegalMoves, makeMove, getGameState } from "../src/engine/rules";
+import { Board } from "../reference/engine/board";
+import { getAllLegalMoves, makeMove, getGameState } from "../reference/engine/rules";
 import {
   BOARD_COLS,
   BOARD_ROWS,
@@ -15,7 +15,7 @@ import {
   TIGER,
   LION,
   ELEPHANT,
-} from "../src/engine/constants";
+} from "../reference/engine/constants";
 import {
   PSTS,
   INF,
@@ -27,8 +27,8 @@ import {
   DEN_SQ_BLUE,
   DEN_SQ_RED,
   IS_WATER,
-} from "../src/ai/tables";
-import { Position } from "../src/ai/position";
+} from "../reference/ai/tables";
+import { Position } from "../reference/ai/position";
 import {
   evaluate,
   evaluatePos,
@@ -36,8 +36,8 @@ import {
   applyWeights,
   resetWeights,
   PIECE_VALUES,
-} from "../src/ai/evaluation";
-import { DEFAULT_WEIGHTS, WEIGHTS } from "../src/ai/weights";
+} from "../reference/ai/evaluation";
+import { DEFAULT_WEIGHTS, WEIGHTS } from "../reference/ai/weights";
 import { makeRng, pick, randRange } from "./helpers";
 
 function sq(r: number, c: number): number {

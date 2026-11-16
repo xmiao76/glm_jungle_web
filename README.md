@@ -1,149 +1,133 @@
-# Jungle — Web Edition
+# Jungle — WebAssembly Edition
 
-A browser-based Jungle (Dou Shou Qi / Animal Chess) board game with a built-in
-AI, deployed as a fully static app on Cloudflare Pages. Play it here:
+Jungle (Dou Shou Qi / Animal Chess), running entirely in your local browser.
+Version **2.0.0** compiles the interface, Canvas artwork, rules, game controller,
+sound handling, and AI to Rust/WebAssembly. The AI runs in a dedicated worker.
+Small JavaScript loaders connect the WebAssembly modules to browser APIs.
 
-**https://glm-jungle.pages.dev**
+The release is a downloadable ZIP. Build, test locally, and distribute it
+manually. Build and packaging commands do not upload anything or publish a website.
 
-This is the web version of the Windows desktop Jungle game
-(`glm.z_cc_jungle`, Python + Pygame), rewritten in TypeScript with the same
-rules, the same visual design, and a substantially stronger AI.
+## Play a release
 
-## How to Play
+1. Install **Node.js 22 or newer** and extract the complete release ZIP.
+2. On Windows, double-click **start.cmd**. On any supported system, run
+   `node serve.mjs` inside the extracted directory.
+3. The launcher opens **http://127.0.0.1:4173/** in your browser. Stop it with
+   **Ctrl+C** when finished.
 
-- Visit the URL above — nothing to install, works offline after load (no
-  network calls at all).
-- Pick **Human vs AI**, then choose your color and who moves first (four
-  independent combinations, e.g. play Blue but let the AI open).
-- Click one of your pieces to select it. Legal moves show as white dots
-  (quiet moves) or red rings (captures). Click a highlighted square to move.
-  Click the same piece again to deselect; click another own piece to switch.
-- Win by entering the enemy **den** (the marked home square) or by capturing
-  every enemy piece. Draw on 3-fold repetition or after 400 moves.
+No Rust installation, npm dependencies, account, or internet connection is needed
+for playing an extracted release. Use a current desktop Chrome, Edge, or Firefox.
+The launcher serves only the release directory on the loopback interface.
 
-## Controls
+If port 4173 is occupied, run `node serve.mjs --port 4174`.
+Use `--no-open` to print the URL without opening a browser.
+Open the launcher URL rather than double-clicking `index.html` or a `.wasm` file:
+browser modules and workers need the included HTTP loader.
 
-| Input | Action |
-|---|---|
-| Click / tap | Select piece, move to square |
-| `U` or `Ctrl+Z` / Undo button | Take back your last move pair (Human vs AI) |
-| `F` | Flip the board view (display only — never changes game state or turn) |
-| `M` / Sound button | Mute or unmute sound effects |
-| `ESC` | Return to menu |
+## Build, test, and package
 
-The side panel also shows a live move history (captures marked with x) and the
-engine card (search depth, score, speed, difficulty). The main menu includes a
-complete "How to play" guide and build credits (model, code agent, engine
-version).
+Development prerequisites: Node.js 22+, Rust **1.94.1** (pinned by
+`rust-toolchain.toml`), the `wasm32-unknown-unknown` target, and **wasm-pack 0.15.0**.
 
-## Game Modes & Difficulty
-
-- **Human vs AI** — choose side (Blue/Red) and first mover independently.
-- **AI vs AI** — watch two engines play; choose who opens.
-- **Difficulty** (click to cycle on the main menu): Easy (0.4 s, depth 3),
-  Medium (1.2 s), Hard (3.0 s).
-
-## Piece Rankings (high → low)
-
-8 象 Elephant · 7 狮 Lion · 6 虎 Tiger · 5 豹 Leopard · 4 狼 Wolf · 3 狗 Dog ·
-2 猫 Cat · 1 鼠 Rat
-
-Specials: the Rat can capture the Elephant (from land only) and is the only
-piece that can swim; the Elephant cannot capture the Rat; a Lion leaps both
-river crossings (up to 3 water squares), the Tiger only the 2-square
-crossing; any rat in the water blocks a leap; an opponent's trap reduces your
-piece's rank to 0.
-
-## AI Architecture & Strength
-
-Everything runs client-side: the engine and AI are a runtime-agnostic
-TypeScript package executed inside a Web Worker (the UI never blocks).
-
-- **Search**: iterative-deepening PVS with quiescence, transposition table
-  (dual 32-bit Zobrist keys), killer/history move ordering, MVV-LVA, LMR with
-  re-search, aspiration windows, futility pruning, and repetition-aware draw
-  scoring. Zero allocations in the hot path (typed arrays, encoded int moves).
-- **Evaluation**: material x10 (dominant) + BFS den-distance pressure/defense
-  (rivers cost what they really cost), piece-square tables, mobility,
-  rat-elephant matchup, trap danger, and an endgame den-race term.
-
-Measured strength against the desktop Python engine on the same machine
-(seeded random openings, alternating colors, equal time budgets) — full logs
-in [`docs/strength-results.md`](docs/strength-results.md):
-
-- **Node throughput: 18–28x** the Python engine (835k–2.5M nps vs 45–90k),
-  reaching **4–10 more plies** in identical budgets (depth 10-12 vs 6 from
-  the start position at 1.2–3 s).
-- Every search heuristic was **re-tested by duels at the new depth profile**:
-  RFP and null-move stay OFF (50.0% each — no gain), aggressive LMR confirmed
-  (fixed-1-ply scored 33.8%), futility confirmed ON (46.3% when disabled),
-  den-threat extension neutral (57.5% then 50.8% on confirmation — kept ON).
-- **Evaluation tuning** (Texel-style logistic fit on 7,508 self-play samples,
-  RMSProp + coordinate pass): the fit only improved the loss by pushing
-  weights outside sanity bounds (self-play outcome leakage), so the duel gate
-  refused the change — the shipped weights stay the duel-proven set.
-- **Cross-language gate**: **TS 34 – 1 Python – 5 draws (91.3%)** over 40
-  games at equal 3 s/move budgets with alternating colors and seeded random
-  openings (gate: >= 65%). Full log: docs/strength-results.md §3.
-
-## Development
-
-```bash
-npm install          # dependencies
-npm run dev          # vite dev server
-npm test             # vitest suite (engine rules, AI cross-validation, search, UI)
-npm run build        # typecheck + production build
-npm run bench        # depth/nps benchmark (add -- 1.0 for budget)
-npm run duel:local   # in-process config duels (--a rfp --b base --games 40 --time 0.15)
-npm run selfplay     # generate tuning data (--games 100 --time 0.08)
-npm run tune         # Texel tuning with duel gate (--data data/....jsonl)
-npm run duel         # cross-language duel vs the Python engine (--games 40 --time 3 --parallel 4)
-npm run deploy       # build + deploy to Cloudflare Pages
+```sh
+rustup toolchain install 1.94.1 --target wasm32-unknown-unknown
+cargo install wasm-pack --version 0.15.0 --locked
+npm ci
+npm run build
+npm run preview
 ```
 
-The cross-language duel drives the desktop Python engine through
-`tools/py_duel_engine.py` (expects the desktop repo at `C:\GitHub\glm.z_cc_jungle`).
+`npm run build` compiles both optimized WebAssembly modules, checks TypeScript,
+bundles the application, and records release assets in `dist/manifest.json`.
+`npm run preview` serves that exact output through the included launcher.
 
-### Layout
-
-```
-src/engine/    rules core (Board, rules, draw conventions) — ported 1:1
-src/ai/        position core, search, evaluation, weights, TT (TypeScript)
-src/worker/    AI Web Worker + typed message protocol
-src/ui/        Canvas board renderer, procedural animal art, React shell
-src/bench/     benchmark / duel / selfplay / tune harnesses (Node CLIs)
-tools/         Python duel driver, browser smoke tests (Playwright)
-tests/         vitest suite — includes fuzz tests asserting the fast AI
-               move generator is exactly equivalent to the rules engine
+```sh
+npm test                             # Rust, WASM/reference parity, regression, launcher/package tests
+npx playwright install chromium firefox
+npm run test:browser                  # local browser behavior and failure recovery
+node tools/browserFullGame.mjs        # also complete an AI-vs-AI game and restart
+npm run test:browser -- --firefox
+npm run package
 ```
 
-### Testing
+Packaging verifies every file against the build manifest and creates:
 
-- `tests/rules.test.ts` + `board.test.ts`: full desktop rule-suite port.
-- `tests/position.test.ts`: fuzz cross-validation (movegen, Zobrist keys,
-  material, make/undo) — rules legality can never drift during strength work.
-- `tests/search.test.ts`: PVS equivalence vs plain alpha-beta, abort safety,
-  quiescence/LMR soundness, TT mate normalization, repetition awareness.
-- `tests/evaluation.test.ts`: BFS maps, PSTs, material-dominance invariant.
-- `tests/integration.test.ts`: full AI-vs-AI games, den-win scenarios, draw rule.
-- `tools/browserCheck.mjs` / `tools/browserFullGame.mjs`: Playwright checks of
-  the live app, including a complete AI-vs-AI game to the win overlay.
+- `releases/jungle-web-v2.0.0.zip`
+- `releases/jungle-web-v2.0.0.zip.sha256`
 
-## Deployment
+**Extract and test that ZIP, then distribute the same archive.** Packaging does
+not rebuild. Changed or extra build files are rejected. Existing versioned ZIPs
+are never overwritten; preserve the tested release and bump the version in both
+`package.json` and the Cargo workspace for the next release.
 
-Static assets on Cloudflare Pages (`npm run deploy`; SPA fallback via `public/_redirects`). An alternate Workers deployment exists (`npm run deploy:workers` → https://jungle-web.xmiao76.workers.dev). Every
-deploy is validated on the live URL: loads, complete games finish, all
-difficulty levels and both modes work, flip/panel/game-over messaging behave,
-no console errors.
+The manifest records version, source revision, dirty-working-tree status,
+toolchain versions, and SHA-256 hashes. The archive contains two `.wasm` modules,
+HTML/CSS/JavaScript loaders, launchers, and instructions. It excludes source code,
+Node dependencies, Rust build products, and Cloudflare tooling.
 
-## Build Info
+For development, `npm run dev` builds development WebAssembly modules and starts
+Vite. Rust source edits trigger recompilation and a full browser reload. Use
+`npm run typecheck` and `cargo clippy --workspace --target wasm32-unknown-unknown`
+for static checks. Browser suites start their own loopback server by default;
+`JUNGLE_TEST_ROOT` can point them at an extracted release directory.
 
-- **Code agent:** Claude Code (claude.ai/code)
-- **Model:** GLM-5.3
-- **Engine:** TypeScript port of the Python desktop engine with identical
-  rules; search/evaluation re-architected for speed and re-validated by duels.
-- **Deployment:** Cloudflare Pages (Vite build; alternate Workers deployment available).
+## Playing the game
 
-*Released August 2026, engine v1.1.0. Based on the desktop Jungle game built
-with the same prompt-driven workflow (see `prompt.md`). Sound effects are
-synthesized in-browser with WebAudio; the mute preference persists locally.*
+- Choose **Human vs AI**, then choose your color and first mover independently.
+- Or choose **AI vs AI** and watch two engines play.
+- Difficulty cycles through Easy (0.4 seconds, depth 3), Medium (1.2 seconds),
+  and Hard (3 seconds).
+- Click/tap a piece and a highlighted destination. White dots indicate quiet
+  moves; red rings indicate captures.
+- Enter the enemy den or capture every enemy piece to win. Threefold repetition
+  and the 400-turn cap are draws. Having no legal move is a loss.
+
+| Control | Action |
+| --- | --- |
+| U or Ctrl/Cmd+Z | Undo the last human/AI move pair |
+| F | Flip the board view |
+| M | Toggle sound; preference persists in local browser storage |
+| Escape | Return to the menu and cancel any search |
+
+Ranks: Elephant 8, Lion 7, Tiger 6, Leopard 5, Wolf 4, Dog 3, Cat 2, Rat 1.
+Only Rats swim. A Rat can capture an Elephant from land; an Elephant cannot
+capture a Rat. Lions jump up to three water squares and Tigers up to two; any
+Rat in a river blocks the jump. Enemy traps reduce a piece's rank to zero.
+The menu includes the full rules and credits.
+
+## Architecture and engine tools
+
+| Location | Purpose |
+| --- | --- |
+| `crates/jungle-core` | Rules, board representation, game state/undo, evaluation, search |
+| `crates/jungle-app` | Yew interface, procedural Canvas rendering, input, sound, worker lifecycle |
+| `crates/jungle-worker` | Worker initialization and WebAssembly engine API |
+| `src/` | Browser loaders, styling, and Node benchmark adapters |
+| `reference/` | Original v1.1 TypeScript implementation used only by development/tests |
+| `tools/` | Build, local server, archive creation, browser tests, Python duel driver |
+
+React is retained solely as a development dependency for the original reference
+UI tests. It is absent from the production bundle. Production gameplay has no
+JavaScript engine fallback. A load/search failure shows a retryable error without
+incorrectly awarding a win or loss.
+
+```sh
+npm run bench -- 1.0
+npm run duel:local -- --a base --b rfp --games 40 --time 0.15
+npm run selfplay -- --games 100 --time 0.08
+npm run tune -- --data data/selfplay-g100-t0.08-s11.jsonl
+npm run duel -- --games 40 --time 3 --parallel 4
+```
+
+These harnesses run search through the same WebAssembly module as the browser.
+TypeScript board/feature helpers remain as reference tooling; tuning never
+changes shipped weights automatically. The Python duel expects the original
+desktop repository at `C:\GitHub\glm.z_cc_jungle`. Its historical JSON labels
+`ts`/`tsIsBlue` remain for log compatibility and now identify the WASM contestant.
+Performance and strength evidence is recorded in
+[docs/strength-results.md](docs/strength-results.md).
+
+Original game: GLM-5.3 / Claude Code, based on the Python/Pygame Jungle game.
+WebAssembly port: OpenAI Codex. The original specification is retained in
+`prompt.md` as historical context; its website-deployment requirements are superseded.

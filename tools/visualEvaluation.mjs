@@ -8,7 +8,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
 
-const url = process.argv[2] ?? "http://localhost:5199";
+const url = process.argv[2] ?? "http://127.0.0.1:4173";
 const resultsDir = "results/visual-eval";
 mkdirSync(resultsDir, { recursive: true });
 

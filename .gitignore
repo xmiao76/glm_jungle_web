@@ -6,3 +6,6 @@ coverage/
 data/
 results/
 .vite/
+target/
+generated/
+releases/

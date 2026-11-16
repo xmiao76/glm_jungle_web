@@ -1,7 +1,7 @@
 /** Tests for the Board class (1:1 port of tests/test_board.py). */
 import { describe, expect, test } from "vitest";
-import { Board } from "../src/engine/board";
-import { Piece } from "../src/engine/piece";
+import { Board } from "../reference/engine/board";
+import { Piece } from "../reference/engine/piece";
 import {
   BOARD_ROWS,
   BOARD_COLS,
@@ -11,7 +11,7 @@ import {
   TERRAIN_MAP,
   BLUE_START,
   RED_START,
-} from "../src/engine/constants";
+} from "../reference/engine/constants";
 
 describe("TestBoardSetup", () => {
   test("board dimensions", () => {

@@ -1,17 +1,17 @@
 /** Tests for the v1.1 UI features: move notation, undo round-trip, sounds. */
 import { describe, expect, test } from "vitest";
-import { moveNotation, squareName } from "../src/ui/components";
+import { moveNotation, squareName } from "../reference/ui/components";
 import {
   GameController,
   GameState,
   GameMode,
   type MoveLogEntry,
-} from "../src/ui/gameController";
-import type { AiClient } from "../src/worker/aiClient";
-import { sounds } from "../src/ui/sounds";
-import { Board } from "../src/engine/board";
-import { computeHash } from "../src/ai/zobrist";
-import { BLUE, RED, RAT, LION } from "../src/engine/constants";
+} from "../reference/ui/gameController";
+import type { AiClient } from "../reference/worker/aiClient";
+import { sounds } from "../reference/ui/sounds";
+import { Board } from "../reference/engine/board";
+import { computeHash } from "../reference/ai/zobrist";
+import { BLUE, RED, RAT, LION } from "../reference/engine/constants";
 
 /** Stub AI client: resolves with the given move (or never when move=null). */
 function stubAiClient(move?: { fromRow: number; fromCol: number; toRow: number; toCol: number }): AiClient {

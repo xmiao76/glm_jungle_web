@@ -6,13 +6,13 @@
  * Run:  npx tsx src/bench/duelGame.ts --seed 7 --time 3 --tsblue 1
  */
 import { spawn } from "node:child_process";
-import { Board } from "../engine/board";
-import { BLUE, RED } from "../engine/constants";
-import { getAllLegalMoves, makeMove, getGameState } from "../engine/rules";
-import { findBestMove } from "../ai/search";
-import { TranspositionTable } from "../ai/transposition";
-import { computeHash, mulberry32 } from "../ai/zobrist";
-import { checkDraw, hashKey, MAX_GAME_MOVES } from "../engine/draw";
+import { Board } from "../../reference/engine/board";
+import { BLUE, RED } from "../../reference/engine/constants";
+import { getAllLegalMoves, makeMove, getGameState } from "../../reference/engine/rules";
+import { findBestMove } from "../wasm/engine";
+import { TranspositionTable } from "../wasm/engine";
+import { computeHash, mulberry32 } from "../../reference/ai/zobrist";
+import { checkDraw, hashKey, MAX_GAME_MOVES } from "../../reference/engine/draw";
 
 interface PyLine {
   ok?: boolean;

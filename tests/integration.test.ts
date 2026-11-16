@@ -1,8 +1,8 @@
 /** Integration tests: complete game scenarios, AI vs AI games, regressions.
  * Port of tests/test_integration.py. */
 import { describe, expect, test } from "vitest";
-import { Board } from "../src/engine/board";
-import { Move } from "../src/engine/move";
+import { Board } from "../reference/engine/board";
+import { Move } from "../reference/engine/move";
 import {
   getLegalMoves,
   getAllLegalMoves,
@@ -10,12 +10,11 @@ import {
   getGameState,
   makeMoveInPlace,
   undoMoveInPlace,
-} from "../src/engine/rules";
-import { BLUE, RED, RAT, CAT, TIGER, LION } from "../src/engine/constants";
-import { findBestMove } from "../src/ai/search";
-import { TranspositionTable } from "../src/ai/transposition";
-import { computeHash } from "../src/ai/zobrist";
-import { checkDraw, hashKey, MAX_GAME_MOVES } from "../src/engine/draw";
+} from "../reference/engine/rules";
+import { BLUE, RED, RAT, CAT, TIGER, LION } from "../reference/engine/constants";
+import { findBestMove, TranspositionTable } from "../src/wasm/engine";
+import { computeHash } from "../reference/ai/zobrist";
+import { checkDraw, hashKey, MAX_GAME_MOVES } from "../reference/engine/draw";
 
 describe("TestAIVsAIGames", () => {
   test("ai vs ai completes game", () => {

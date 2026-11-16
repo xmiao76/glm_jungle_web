@@ -8,16 +8,16 @@
  * Run:  npm run selfplay -- --games 120 --time 0.08 --seed 11
  */
 import { mkdirSync, writeFileSync } from "node:fs";
-import { Board } from "../engine/board";
-import { BLUE, RED } from "../engine/constants";
-import { getAllLegalMoves, makeMove, getGameState } from "../engine/rules";
-import { findBestMove } from "../ai/search";
-import { TranspositionTable } from "../ai/transposition";
-import { Position } from "../ai/position";
-import { evaluateFeatures } from "../ai/evaluation";
-import { PIECE_VALUES } from "../ai/evaluation";
-import { computeHash, mulberry32 } from "../ai/zobrist";
-import { checkDraw, hashKey } from "../engine/draw";
+import { Board } from "../../reference/engine/board";
+import { BLUE, RED } from "../../reference/engine/constants";
+import { getAllLegalMoves, makeMove, getGameState } from "../../reference/engine/rules";
+import { findBestMove } from "../wasm/engine";
+import { TranspositionTable } from "../wasm/engine";
+import { Position } from "../../reference/ai/position";
+import { evaluateFeatures } from "../../reference/ai/evaluation";
+import { PIECE_VALUES } from "../../reference/ai/evaluation";
+import { computeHash, mulberry32 } from "../../reference/ai/zobrist";
+import { checkDraw, hashKey } from "../../reference/engine/draw";
 
 export interface Sample {
   /** Per-weight feature units (mover's perspective). */
@@ -107,6 +107,7 @@ export function generateData(
       current = current === BLUE ? RED : BLUE;
       samples.push({ pos: Position.fromBoard(board, current), side: current });
     }
+    tt.free();
     if (samples.length === 0) continue;
     if (winner === null && samples.length >= 200) winner = materialWinner(board);
     for (let i = skipOpening; i < samples.length; i++) {

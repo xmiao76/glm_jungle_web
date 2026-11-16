@@ -20,7 +20,7 @@ interface GameResult {
 function runGame(seed: number, time: number, tsIsBlue: boolean, python: string): Promise<GameResult> {
   return new Promise((resolve, reject) => {
     const args = [
-      "tsx",
+      "--import", "tsx",
       path.join("src", "bench", "duelGame.ts"),
       "--seed",
       String(seed),
@@ -31,7 +31,8 @@ function runGame(seed: number, time: number, tsIsBlue: boolean, python: string):
       "--python",
       python,
     ];
-    const child = spawn("npx", args, { stdio: ["ignore", "pipe", "pipe"], shell: true });
+    const child = spawn(process.execPath, args, { stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+    child.on("error", reject);
     let out = "";
     let err = "";
     child.stdout.on("data", (d) => (out += d.toString()));
@@ -63,7 +64,7 @@ async function main(): Promise<void> {
   const baseSeed = Number(get("--seed", "5000"));
   const python = get("--python", "python");
 
-  console.log(`Cross-language duel: TS vs Python, ${games} games, ${time}s/move, parallel ${parallel}`);
+  console.log(`Cross-language duel: WASM vs Python, ${games} games, ${time}s/move, parallel ${parallel}`);
   const results: GameResult[] = [];
   let launched = 0;
   const workers: Promise<void>[] = [];
@@ -101,9 +102,10 @@ async function main(): Promise<void> {
   for (const r of results) reasons[r.reason] = (reasons[r.reason] ?? 0) + 1;
 
   console.log("-".repeat(60));
-  console.log(`TS wins ${tsWins} | Python wins ${pyWins} | draws ${draws}`);
-  console.log(`TS score: ${score.toFixed(1)}%  (gate: >= 65%)`);
+  console.log(`WASM wins ${tsWins} | Python wins ${pyWins} | draws ${draws}`);
+  console.log(`WASM score: ${score.toFixed(1)}%  (gate: >= 65%)`);
   console.log(`avg moves/game: ${avgMoves.toFixed(0)}; endings:`, reasons);
+  if (results.some(r => r.reason === "error") || score < 65) process.exitCode = 1;
 }
 
 void main();

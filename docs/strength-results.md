@@ -93,3 +93,85 @@ capture-all, average 55 moves per game). Python's single win came as Blue
 Tuning tooling: `npm run selfplay`, `npm run tune` (see src/bench/tune.ts).
 The pipeline enforces bounds (material ladder, material-dominance) and the
 duel gate is the final arbiter, mirroring bench/tune.py.
+
+## 5. WebAssembly release (v2.0.0, 2026-11-16)
+
+The application UI, Canvas artwork, game controller, rules, evaluation, and
+search now run in Rust/WebAssembly. Node engine tools load the same worker
+module as the browser. The original TypeScript implementation in `reference/`
+remains a development oracle; it is not included in the playable release.
+The historical measurements above describe v1.x and are retained unchanged.
+
+### Regression and release validation
+
+- `npm test`: 156 Vitest tests, 8 Rust game/search tests, and 2 Node
+  launcher/package tests passed. WASM parity checks cover more than 1,000
+  seeded positions, legal moves, evaluation, hashes, material/PST totals,
+  make/undo, and fixed-depth search results.
+- TypeScript checking, Rust formatting, and Clippy with warnings denied passed.
+- The actual ZIP was extracted into a temporary directory containing spaces,
+  outside the repository. `start.cmd --port 0 --no-open` ran from another
+  working directory without repository files or npm dependencies.
+- Chromium and Firefox passed all 12 difficulty/color/first-mover combinations,
+  human moves and AI replies, undo, flip, sound toggle, resizing, search
+  cancellation, and missing/corrupt WASM recovery. External network requests
+  were blocked. Chromium also completed a 58-ply AI game and restarted it.
+- The Firefox sound-toggle assertion now waits for Yew's asynchronous DOM
+  update. This was a test timing fix; the tested release bytes were unchanged.
+- Self-play, tuning, and local config-duel smoke checks completed. Tuning did
+  not change the shipped weights.
+
+The manually distributable archive is `releases/jungle-web-v2.0.0.zip`
+(267,568 bytes). Its SHA-256, verified before and after the extracted-package
+browser checks, is:
+
+```text
+73253ee449babb8dca0fda7f73f8f6343699e281854a6a18d0ad0e7d7eef3f34
+```
+
+All 10 asset hashes match `manifest.json`. Packaging did not rebuild or upload
+anything. Website deployment commands and Wrangler configuration were removed.
+The ZIP and checksum are local release artifacts, intentionally ignored by Git.
+
+### WebAssembly throughput
+
+Measured sequentially after the duel and browser checks finished, with no other
+task workload running: `npm run bench -- 1.0`, then the desktop repository's
+`python -m bench.benchmark`. Both use the same six positions, a 1-second budget,
+and a fresh transposition table per search. Environment: Windows, Node 24.13.0,
+Python 3.12.9, Rust 1.94.1, wasm-pack 0.15.0.
+
+| Position | Side | Python depth | Python nodes/s | WASM depth | WASM nodes/s | WASM/Python |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| starting | Blue | 6 | 37,561 | 11 | 1,283,856 | **34.2x** |
+| starting | Red | 6 | 40,644 | 11 | 1,324,396 | **32.6x** |
+| midgame | Blue | 9 | 41,663 | 15 | 1,536,370 | 36.9x |
+| midgame | Red | 9 | 50,328 | 15 | 1,881,783 | 37.4x |
+| tactical | Blue | 16 | 80,507 | 28 | 2,367,664 | 29.4x |
+| tactical | Red | 18 | 80,706 | 28 | 2,566,900 | 31.8x |
+
+**Starting-position throughput gate (at least 5x Python): PASSED.**
+These are measurements from this workstation, not minimum hardware guarantees.
+
+### WebAssembly vs Python strength gate
+
+Command: `npm run duel -- --games 40 --time 3 --parallel 4`.
+Alternating colors, seeds 5000-5039, six random opening plies, persistent
+per-side transposition tables, threefold repetition and the 400-turn cap.
+The Node-loaded worker binary is byte-identical to the worker in the ZIP.
+
+| Games | Budget | WASM wins | Python wins | Draws | WASM score | Gate (at least 65%) |
+| ---: | --- | ---: | ---: | ---: | ---: | --- |
+| 40 | 3 seconds/move | **33** | 1 | 6 | **90.0%** | **PASSED** |
+
+All games completed without harness errors: 34 ended by den entry or
+capture-all, and 6 by repetition. The average was 54 full moves. Python's
+single win was seed 5012, playing Red. Score counts a win as 1 and a draw as 0.5.
+Four games ran concurrently; build/browser verification overlapped part of
+the duel, so this wall-clock result is subject to machine-load variation.
+It validates the required gate, not a statistically significant strength
+comparison with the historical TypeScript release.
+
+The [complete 40-game log](wasm-v2-python-gate.txt) is retained with the source.
+Its historical `TS`/`tsIsBlue` labels identify the WASM contestant, retained
+for compatibility with the original tooling.

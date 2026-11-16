@@ -15,15 +15,15 @@
  * demonstrated it); pass --tune-values to override.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { Board } from "../engine/board";
-import { BLUE, RED } from "../engine/constants";
-import { getGameState, makeMove } from "../engine/rules";
-import { findBestMove, SearchConfig } from "../ai/search";
-import { TranspositionTable } from "../ai/transposition";
-import { applyWeights } from "../ai/evaluation";
-import { DEFAULT_WEIGHTS, WEIGHTS, type Weights } from "../ai/weights";
-import { computeHash } from "../ai/zobrist";
-import { checkDraw, hashKey } from "../engine/draw";
+import { Board } from "../../reference/engine/board";
+import { BLUE, RED } from "../../reference/engine/constants";
+import { getGameState, makeMove } from "../../reference/engine/rules";
+import { findBestMove, SearchConfig } from "../wasm/engine";
+import { TranspositionTable } from "../wasm/engine";
+import { applyWeights } from "../../reference/ai/evaluation";
+import { DEFAULT_WEIGHTS, WEIGHTS, type Weights } from "../../reference/ai/weights";
+import { computeHash } from "../../reference/ai/zobrist";
+import { checkDraw, hashKey } from "../../reference/engine/draw";
 import { materialWinner, openingPosition, type Sample } from "./selfplay";
 
 const LINEAR_KEYS: string[] = [
@@ -282,6 +282,8 @@ function duelWeights(
       current = current === BLUE ? RED : BLUE;
       if (ply === 199) hitCap = true;
     }
+    ttBase.free();
+    ttNew.free();
     if (winner === null && hitCap) winner = materialWinner(board);
     if (winner === newSide) wins++;
   }

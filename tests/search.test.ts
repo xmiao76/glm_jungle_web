@@ -1,15 +1,16 @@
-/** Correctness tests for the Jungle search. Port of tests/test_search.py,
- * adapted to the TS internals exported via `__testing`. */
+/** Search regression fixtures execute public search in WASM. Reference-only
+ * internal assertions supplement the cross-language parity suite. */
 import { describe, expect, test } from "vitest";
-import { Board } from "../src/engine/board";
+import { Board } from "../reference/engine/board";
 
-import { getAllLegalMoves, makeMove } from "../src/engine/rules";
-import { BOARD_COLS, BLUE, RED, RAT, WOLF, TIGER, LION, ELEPHANT } from "../src/engine/constants";
-import { findBestMove, SearchConfig, WIN, MAX_PLY, __testing } from "../src/ai/search";
-import { Position } from "../src/ai/position";
-import { evaluate } from "../src/ai/evaluation";
-import { scoreToTt, scoreFromTt, MATE_THRESHOLD } from "../src/ai/transposition";
-import { computeHash } from "../src/ai/zobrist";
+import { getAllLegalMoves, makeMove } from "../reference/engine/rules";
+import { BOARD_COLS, BLUE, RED, RAT, WOLF, TIGER, LION, ELEPHANT } from "../reference/engine/constants";
+import { findBestMove, SearchConfig } from "../src/wasm/engine";
+import { WIN, MAX_PLY, __testing } from "../reference/ai/search";
+import { Position } from "../reference/ai/position";
+import { evaluate } from "../reference/ai/evaluation";
+import { scoreToTt, scoreFromTt, MATE_THRESHOLD } from "../reference/ai/transposition";
+import { computeHash } from "../reference/ai/zobrist";
 
 // --- Incremental Zobrist parity (adapted: child key via make vs recompute) ---
 
